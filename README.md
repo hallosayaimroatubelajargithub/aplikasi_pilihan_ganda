@@ -57,7 +57,7 @@ streamlit run app/main.py
 ```
 
 ## Online Access
-<b>Link:</b> https://prediction-orange-quality.streamlit.app/
+<b>Link:</b> https://aplikasipilihanganda.streamlit.app/
 
 ## MIT License
 Copyright (c) 2024 Imroatu Solicah
