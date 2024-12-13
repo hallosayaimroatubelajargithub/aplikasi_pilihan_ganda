@@ -1,7 +1,7 @@
 import requests
 
-API_URL = "https://saas.cakra.ai/genv2/llms"
-API_TOKEN = "75f7a185-55a8-4aae-b0b2-47e016493b60"
+API_URL = ""
+API_TOKEN = ""
 
 def validate_answer_with_llm(question, user_answer, correct_answer):
     headers = {
