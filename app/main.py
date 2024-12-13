@@ -1,6 +1,14 @@
 import streamlit as st
-from utils.file_handler import process_file
-from utils.question_parser import parse_questions
+import sys
+import os
+
+# Tambahkan direktori utama proyek ke sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from app.utils.file_handler import process_file
+from app.utils.question_parser import parse_questions
+from app.utils.api_client import validate_answer_with_llm
+
 
 st.set_page_config(page_title="Aplikasi Pilihan Ganda", layout="wide")
 
@@ -23,29 +31,22 @@ def main():
                 user_answers[idx] = st.radio("", question['options'], key=f"q{idx}")
 
             if st.button("Submit"):
-                correct_count = 0
-                feedback = []
-
+                score = 0
+                st.header("Hasil dan Pembenaran")
                 for idx, question in enumerate(questions):
-                    correct = user_answers[idx] == question['answer']
-                    correct_count += correct
-                    feedback.append({
-                        "question": question['question'],
-                        "user_answer": user_answers[idx],
-                        "correct_answer": question['answer'],
-                        "is_correct": correct
-                    })
-                
-                st.success(f"Skor Anda: {correct_count}/{len(questions)}")
-
-                st.header("Pembenaran Jawaban")
-                for item in feedback:
-                    st.write(f"**{item['question']}**")
-                    st.write(f"- Jawaban Anda: **{item['user_answer']}**")
-                    if item['is_correct']:
-                        st.write(":white_check_mark: **Benar**")
+                    user_answer = user_answers[idx]
+                    llm_response = validate_answer_with_llm(question['question'], user_answer, question['answer'])
+                    
+                    st.write(f"**{idx+1}. {question['question']}**")
+                    st.write(f"- Jawaban Anda: **{user_answer}**")
+                    if llm_response["is_correct"]:
+                        st.write(":white_check_mark: **Benar!**")
+                        score += 1
                     else:
-                        st.write(f":x: **Salah**, Jawaban yang benar adalah: **{item['correct_answer']}**")
+                        st.write(f":x: **Salah**, Jawaban yang benar adalah: **{question['answer']}**")
+                        st.write(f"_Catatan AI_: {llm_response['explanation']}")
+                
+                st.success(f"Skor Anda: {score}/{len(questions)}")
         else:
             st.error("Tidak ada soal ditemukan dalam file.")
     else:
